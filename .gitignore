@@ -1,3 +1,5 @@
+# Ignore .env file for environment variables
+.env
 **.out
 build
 .vscode
