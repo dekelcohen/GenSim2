@@ -1,3 +1,4 @@
+python-dotenv
 icecream
 numpy
 drake==1.22.0

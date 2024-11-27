@@ -11,6 +11,8 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import TerminalFormatter
 import re
 import openai
+from openai import AzureOpenAI
+from dotenv import load_dotenv
 import IPython
 import time
 import traceback
@@ -47,7 +49,21 @@ from gensim2.pipeline.utils.trimesh_render import lookAt
 from gensim2.pipeline.utils.trimesh_URDF import getURDF
 
 
-model = "gpt-4-turbo"
+load_dotenv()
+
+azure_deployment_model=os.environ['AZURE_DEPLOYMENT_MODEL']
+
+azure_client = AzureOpenAI(
+    azure_deployment = azure_deployment_model,
+    api_key = os.environ['AZURE_OPENAI_API_KEY'],
+    azure_endpoint = os.environ['AZURE_OPENAI_ENDPOINT'],
+    api_version = os.environ['AZURE_OPENAI_API_VERSION'],
+   )
+
+# OpenAI or AzureOpenAI completion client
+Completion_Obj = azure_client.chat.completions if os.environ['AZURE_OPENAI_ENDPOINT'] else openai.ChatCompletion
+
+model =  azure_deployment_model if azure_deployment_model else "gpt-4-turbo"
 reply_max_tokens = 6000
 
 
@@ -306,7 +322,7 @@ def set_llm_model(model_name):
     model = model_name
 
     print("using gpt model:", model)
-    if model_name == "gpt-4o":  # longer context
+    if model_name.startswith("gpt-4o"):  # longer context
         reply_max_tokens = 100 * 1000
 
 
@@ -691,7 +707,7 @@ def generate_feedback(
         try:
             if interaction_txt is not None:
                 add_to_txt(interaction_txt, ">>> Prompt: \n" + prompt, with_print=False)
-            call_res = openai.ChatCompletion.create(**params)
+            call_res = Completion_Obj.create(**params)            
             res = call_res["choices"][0]["message"]["content"]
             existing_messages.append({"role": "assistant", "content": res})
 
@@ -760,7 +776,7 @@ def generate_feedback_visual(
             if interaction_txt is not None:
                 add_to_txt(interaction_txt, ">>> Prompt: \n" + prompt, with_print=False)
 
-            call_res = openai.ChatCompletion.create(**params)
+            call_res = Completion_Obj.create(**params)
             res = call_res["choices"][0]["message"]["content"]
             existing_messages.append({"role": "assistant", "content": res})
 
