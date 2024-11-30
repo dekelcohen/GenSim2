@@ -708,7 +708,7 @@ def generate_feedback(
             if interaction_txt is not None:
                 add_to_txt(interaction_txt, ">>> Prompt: \n" + prompt, with_print=False)
             call_res = Completion_Obj.create(**params)            
-            res = call_res["choices"][0]["message"]["content"]
+            res = call_res.choices[0].message.content
             existing_messages.append({"role": "assistant", "content": res})
 
             to_print = highlight(f"{res}", PythonLexer(), TerminalFormatter())
@@ -777,7 +777,7 @@ def generate_feedback_visual(
                 add_to_txt(interaction_txt, ">>> Prompt: \n" + prompt, with_print=False)
 
             call_res = Completion_Obj.create(**params)
-            res = call_res["choices"][0]["message"]["content"]
+            res = call_res.choices[0].message.content
             existing_messages.append({"role": "assistant", "content": res})
 
             to_print = highlight(f"{res}", PythonLexer(), TerminalFormatter())
